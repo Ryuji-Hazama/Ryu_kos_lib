@@ -1,29 +1,69 @@
 DECLARE GLOBAL FUNCTION gentleThrottleUp {
-	PARAMETER current_throttle, target_throttle.
+	PARAMETER current_throttle, max_throttle.
 	LOCK THROTTLE TO current_throttle.
 
-	FROM { SET t TO current_throttle. } UNTIL t >= target_throttle STEP { SET t TO t + 0.05. } DO {
+	FROM { SET t TO current_throttle. } UNTIL t >= max_throttle STEP { SET t TO t + 0.05. } DO {
 		SET current_throttle TO t.
 		WAIT 0.05.
 	}
 
-	SET current_throttle TO target_throttle.
-	RETURN target_throttle.
+	SET current_throttle TO max_throttle.
+	RETURN max_throttle.
 }
 
 DECLARE GLOBAL FUNCTION gentleThrottleDown {
-	PARAMETER current_throttle, target_throttle.
+	PARAMETER current_throttle, min_throttle.
 	LOCK THROTTLE TO current_throttle.
 
-	FROM { SET t TO current_throttle. } UNTIL t <= target_throttle STEP { SET t TO t - 0.05. } DO {
+	FROM { SET t TO current_throttle. } UNTIL t <= min_throttle STEP { SET t TO t - 0.05. } DO {
 		SET current_throttle TO t.
 		WAIT 0.05.
 	}
 
-	SET current_throttle TO target_throttle.
-	RETURN target_throttle.
+	SET current_throttle TO min_throttle.
+	RETURN min_throttle.
 }
 
 DECLARE GLOBAL FUNCTION getCurrentPitch {
 	RETURN 90 - VANG(SHIP:FACING:VECTOR, SHIP:UP:VECTOR).
+}
+
+DECLARE GLOBAL FUNCTION getApAdjustAngle {
+	PARAMETER target_apoapsis.
+	PARAMETER previous_apoapsis.
+	SET current_apoapsis TO SHIP:ORBIT:APOAPSIS.
+	SET diff TO current_apoapsis - previous_apoapsis.
+	SET over_shoot TO (target_apoapsis - current_apoapsis) / 100.
+
+	IF over_shoot <= -1 {
+		IF diff > 100 {
+			RETURN over_shoot * 2.
+		}
+		ELSE IF diff > 50 {
+			RETURN over_shoot.
+		}
+		ELSE IF diff > -50 {
+			RETURN over_shoot * 0.5.
+		}
+		ELSE IF diff < -80 {
+			RETURN over_shoot * -1.
+		}
+		RETURN 0.
+	}
+	ELSE IF over_shoot >= 1 {
+		IF diff < -100 {
+			RETURN over_shoot * 2.
+		}
+		ELSE IF diff < -50 {
+			RETURN over_shoot.
+		}
+		ELSE IF diff < 50 {
+			RETURN over_shoot * 0.5.
+		}
+		ELSE IF diff > 80 {
+			RETURN over_shoot * -1.
+		}
+		RETURN 0.
+	}
+	RETURN 0.
 }
