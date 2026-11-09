@@ -35,33 +35,33 @@ DECLARE GLOBAL FUNCTION getApAdjustAngle {
 	SET diff TO current_apoapsis - previous_apoapsis.
 	SET over_shoot TO (target_apoapsis - current_apoapsis) / 100.
 
-	IF over_shoot <= -1 {
-		IF diff > 100 {
-			RETURN over_shoot * 2.
-		}
-		ELSE IF diff > 50 {
+	IF over_shoot <= -0.1 {
+		IF diff > 80 {
 			RETURN over_shoot.
 		}
-		ELSE IF diff > -50 {
+		ELSE IF diff > 30 {
 			RETURN over_shoot * 0.5.
 		}
-		ELSE IF diff < -80 {
-			RETURN over_shoot * -1.
+		ELSE IF diff > -10 {
+			RETURN over_shoot * 0.3.
+		}
+		ELSE IF diff < -50 {
+			RETURN over_shoot * -0.5.
 		}
 		RETURN 0.
 	}
-	ELSE IF over_shoot >= 1 {
-		IF diff < -100 {
-			RETURN over_shoot * 2.
-		}
-		ELSE IF diff < -50 {
+	ELSE IF over_shoot >= 0.1 {
+		IF diff < -80 {
 			RETURN over_shoot.
 		}
-		ELSE IF diff < 50 {
+		ELSE IF diff < -35 {
 			RETURN over_shoot * 0.5.
 		}
-		ELSE IF diff > 80 {
-			RETURN over_shoot * -1.
+		ELSE IF diff < 10 {
+			RETURN over_shoot * 0.3.
+		}
+		ELSE IF diff > 50 {
+			RETURN over_shoot * -0.5.
 		}
 		RETURN 0.
 	}
