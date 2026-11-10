@@ -28,6 +28,14 @@ DECLARE GLOBAL FUNCTION getCurrentPitch {
 	RETURN 90 - VANG(SHIP:FACING:VECTOR, SHIP:UP:VECTOR).
 }
 
+DECLARE GLOBAL FUNCTION getCurrentTwr {
+	PARAMETER current_throttle.
+	LOCAL current_thrust IS SHIP:AVAILABLETHRUST * current_throttle.
+	LOCAL radius IS SHIP:ALTITUDE + SHIP:BODY:RADIUS.
+	LOCAL gee IS SHIP:BODY:MU / (radius * radius).
+	RETURN current_thrust / (SHIP:MASS * gee).
+}
+
 DECLARE GLOBAL FUNCTION getApAdjustAngle {
 	PARAMETER target_apoapsis.
 	PARAMETER previous_apoapsis.
